@@ -1,98 +1,58 @@
 import os
-import tkinter as tk
-from tkinter import filedialog, messagebox
-from PIL import Image
+from datetime import datetime
+import json
 
-def buscar_gifs(carpeta):
-    gifs_encontrados = []
-    for root, dirs, files in os.walk(carpeta):
-        for file in files:
-            if file.lower().endswith('.gif'):
-                gifs_encontrados.append(os.path.join(root, file))
-    return gifs_encontrados
-
-def leer_gif(ruta_gif):
-    with open(ruta_gif, 'rb') as f:
+def read_gif(file_name):
+    with open(file_name, 'rb') as f:
         return f.read()
 
-def obtener_version(gif_data):
+def get_gif_info(file_name):
+    gif_data = read_gif(file_name)
+    info = {
+        "Path": file_name,
+        "Version": get_version(gif_data),
+        "Size": get_size(gif_data),
+        "Number of Colors": get_num_colors(gif_data),
+        "Compression": get_compression(gif_data),
+        "Background Color": get_background_color(gif_data),
+        "Creation Date": get_creation_date(file_name),
+        "Modification Date": get_modification_date(file_name)
+    }
+    return info
+
+def get_version(gif_data):
     return gif_data[3:6].decode('ascii')
 
-def obtener_tamaño(gif_data):
+def get_size(gif_data):
     width = int.from_bytes(gif_data[6:8], 'little')
     height = int.from_bytes(gif_data[8:10], 'little')
     return (width, height)
 
-def obtener_num_colores(gif_data):
+def get_num_colors(gif_data):
     packed_field = gif_data[10]
-    color_table_size = 2 ** ((packed_field & 0b111) + 1)  # 2^(N+1)
+    color_table_size = 2 ** ((packed_field & 0b111) + 1)
     return color_table_size
 
-def obtener_compresion(gif_data):
+def get_compression(gif_data):
     return "LZW"
 
-def obtener_formato_numerico(gif_data):
-    return "P"
+def get_background_color(gif_data):
+    return gif_data[11]
 
-def obtener_color_fondo(gif_data):
-    background_color_index = gif_data[11]
-    return background_color_index
+def get_creation_date(file_name):
+    creation_time = os.path.getctime(file_name)
+    return datetime.fromtimestamp(creation_time).strftime('%Y-%m-%d %H:%M:%S')
 
-def contar_imagenes(gif_data):
-    count = 0
-    index = 13
-    while index < len(gif_data):
-        if gif_data[index] == 0x2C:
-            count += 1
-            index += 9
-            lzw_min_code_size = gif_data[index]
-            index += 1
-            while True:
-                block_size = gif_data[index]
-                index += 1
-                if block_size == 0:
-                    break
-                index += block_size
-        else:
-            index += 1
-    return count
+def get_modification_date(file_name):
+    modification_time = os.path.getmtime(file_name)
+    return datetime.fromtimestamp(modification_time).strftime('%Y-%m-%d %H:%M:%S')
 
-def obtener_info_gif(ruta_gif):
-    gif_data = leer_gif(ruta_gif)
-    return {
-        "Versión": obtener_version(gif_data),
-        "Tamaño": obtener_tamaño(gif_data),
-        "Número de Colores": obtener_num_colores(gif_data),
-        "Compresión": obtener_compresion(gif_data),
-        "Formato Numérico": obtener_formato_numerico(gif_data),
-        "Color de Fondo": obtener_color_fondo(gif_data),
-        "Número de Imágenes": contar_imagenes(gif_data)
-    }
+def save_info_to_txt(info, txt_file):
+    with open(txt_file, 'w') as f:
+        json.dump(info, f, indent=4)
 
-def elegir_carpeta():
-    carpeta = filedialog.askdirectory()
-    if carpeta:
-        gifs = buscar_gifs(carpeta)
-        if gifs:
-            lista_gifs.delete(0, tk.END)
-            for gif in gifs:
-                lista_gifs.insert(tk.END, gif)
-                info = obtener_info_gif(gif)
-                print(f"Información para {gif}: {info}")
-            messagebox.showinfo("Búsqueda completada", f"Se encontraron {len(gifs)} archivos GIF.")
-        else:
-            messagebox.showinfo("Sin resultados", "No se encontraron archivos GIF en esta carpeta.")
-
-ventana = tk.Tk()
-ventana.title("Buscador de archivos GIF")
-
-etiqueta = tk.Label(ventana, text="Seleccione una carpeta para buscar archivos GIF:")
-etiqueta.pack(pady=10)
-
-boton_buscar = tk.Button(ventana, text="Seleccionar carpeta", command=elegir_carpeta)
-boton_buscar.pack(pady=5)
-
-lista_gifs = tk.Listbox(ventana, width=80, height=20)
-lista_gifs.pack(pady=10)
-
-ventana.mainloop()
+def load_info_from_txt(txt_file):
+    if os.path.exists(txt_file):
+        with open(txt_file, 'r') as f:
+            return json.load(f)
+    return {}
