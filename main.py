@@ -1,4 +1,5 @@
 import sys
+import os
 from PyQt6.QtWidgets import QApplication, QWidget, QVBoxLayout, QPushButton, QFileDialog, QLabel, QTextEdit
 from PyQt6.QtGui import QPixmap, QFont, QColor
 from PyQt6.QtCore import Qt
@@ -91,6 +92,9 @@ class GifExtractorApp(QWidget):
             # Mostrar el GIF en el QLabel
             self.gif_label.setPixmap(QPixmap(file_name).scaled(300, 300, Qt.AspectRatioMode.KeepAspectRatio))
 
+            # Guardar la ruta del GIF
+            self.gif_path = file_name
+
     def display_info(self):
         # Mostrar los datos extraídos en la interfaz gráfica
         info = "\n".join([f"<font color='#4a90e2'><b>{key}:</b></font> <font color='#333'>{value}</font>" for key, value in self.gif_info.items()])
@@ -98,9 +102,18 @@ class GifExtractorApp(QWidget):
 
     def save_info(self):
         # Guardar la información en un archivo TXT
-        if hasattr(self, 'gif_info'):
-            save_info_to_txt(self.gif_info, "datos_gifs.txt")
-            self.info_text.append("<font color='#4a90e2'><b>Información guardada en 'datos_gifs.txt'.</b></font>")
+        if hasattr(self, 'gif_info') and hasattr(self, 'gif_path'):
+            # Obtener la carpeta donde se encuentra el GIF
+            gif_directory = os.path.dirname(self.gif_path)
+
+            # Definir la ruta completa para guardar el archivo
+            output_path = os.path.join(gif_directory, "datos_gif.txt")
+
+            # Guardar la información en el archivo de texto
+            save_info_to_txt(self.gif_info, output_path)
+
+            # Mostrar mensaje en la interfaz
+            self.info_text.append(f"<font color='#4a90e2'><b>Información guardada en '{output_path}'.</b></font>")
 
     def add_comment(self):
         # Agregar comentarios al archivo de información
