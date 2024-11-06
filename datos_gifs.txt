@@ -1,0 +1,15 @@
+{
+    "N\u00famero de versi\u00f3n": "89a",
+    "Tama\u00f1o de imagen": [
+        375,
+        282
+    ],
+    "Cantidad de colores": 8,
+    "Tipo de compresi\u00f3n": "LZW",
+    "Formato num\u00e9rico": "GIF89a",
+    "Color de fondo": 0,
+    "Cantidad de im\u00e1genes": 0,
+    "Fecha de creaci\u00f3n": "2024-11-06 09:02:47",
+    "Fecha de modificaci\u00f3n": "2024-11-06 09:02:48",
+    "Comentarios agregados": []
+}
