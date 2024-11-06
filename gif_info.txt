@@ -1,0 +1,13 @@
+{
+    "Path": "C:/Users/aless/Desktop/prueba_gif.gif",
+    "Version": "89a",
+    "Size": [
+        375,
+        282
+    ],
+    "Number of Colors": 8,
+    "Compression": "LZW",
+    "Background Color": 0,
+    "Creation Date": "2024-11-06 09:02:47",
+    "Modification Date": "2024-11-06 09:02:48"
+}
